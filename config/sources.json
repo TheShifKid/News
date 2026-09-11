@@ -95,17 +95,6 @@
       "kind": "article"
     },
     {
-      "id": "davar",
-      "name": "דבר",
-      "lean": "left",
-      "topics": [
-        "economy",
-        "politics"
-      ],
-      "url": "https://www.davar1.co.il/feed/",
-      "kind": "article"
-    },
-    {
       "id": "shakuf",
       "name": "שקוף",
       "lean": "left",

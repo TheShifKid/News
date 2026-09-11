@@ -15,9 +15,9 @@ const MIN_TERM_HITS = 2;  // כמה ממילות החיפוש חייבות לה�
 // החיפוש סורק את כל העיתונות, כולל אתרים שאינם ברשימת המקורות.
 // כשיש כמה כתבות מאותו יום, עדיף להציג את הגוף המוכר.
 const PREFERRED = [
-  'ynet', 'mako', 'n12', 'הארץ', 'haaretz', 'דבר', 'davar', 'גלובס', 'globes',
+  'ynet', 'mako', 'n12', 'הארץ', 'haaretz', 'גלובס', 'globes',
   'כאן', 'kan', 'calcalist', 'כלכליסט', 'שיחה מקומית', 'שקוף', 'timesofisrael',
-  'themarker', 'זמן ישראל', 'walla', 'מעריב', 'ישראל היום'
+  'themarker', 'זמן ישראל', 'מעריב', 'ישראל היום'
 ];
 
 const isPreferred = outlet =>
