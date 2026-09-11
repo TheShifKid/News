@@ -21,15 +21,19 @@ for (const e of errors) console.warn('  מקור נכשל:', e.source, e.error);
 const byDefault = rank(stories, defaults);
 const candidates = byDefault.slice(0, 40);
 
+// סעיף הסיפורים המתגלגלים נועד לאירועים גדולים שנמשכים. תוצאות החיפוש
+// משתנות בין ריצה לריצה, ולכן נדרש גם סינון שאינו תלוי בהן.
+const HARD_NEWS = ['security', 'politics', 'economy', 'world'];
+const isHardNews = story => story.topics.some(t => HARD_NEWS.includes(t));
+
 console.log('בודק אילו סיפורים מתגלגלים כבר כמה ימים…');
 const rarity = buildRarity(stories);
-const histories = await lookbackAll(candidates, rarity);
-
 const byId = new Map(stories.map(s => [s.id, s]));
+const histories = await lookbackAll(candidates, rarity);
 
 const rolling = new Map();
 for (const [id, history] of histories) {
-  if (isOngoing(history)) {
+  if (isOngoing(history) && isHardNews(byId.get(id))) {
     // כשכל מה שיש לנו על הסיפור הוא מבזק, העדכון האחרון בציר הזמן הוא
     // כתבה מלאה מגוף חדשות אמיתי, ולכן הוא מה שראוי להציג ולקשר אליו.
     const onlyFlash = byId.get(id)?.sources.every(src => src.kind === 'flash');
