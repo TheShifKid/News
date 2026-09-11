@@ -42,7 +42,7 @@ export function normalize(item, source) {
     link: item.link,
     image: firstImage(item),
     publishedAt: new Date(isNaN(ts) ? Date.now() : ts).toISOString(),
-    source: { id: source.id, name: source.name, lean: source.lean },
+    source: { id: source.id, name: source.name, lean: source.lean, kind: source.kind || 'article' },
     topics: classify(title + ' ' + summary),
     isOpinion: isOpinion(item, source, title)
   };

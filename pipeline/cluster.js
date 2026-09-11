@@ -27,8 +27,12 @@ export function cluster(items, threshold = 0.15) {
   }
 
   return clusters.map(c => {
-    // הידיעה המייצגת: זו עם התקציר העשיר ביותר, כי היא תוצג בכרטיס
-    const items = c.items.sort((a, b) => b.summary.length - a.summary.length);
+    // הידיעה המייצגת: כתבה מלאה לפני מבזק, ובתוך כל סוג — התקציר העשיר ביותר.
+    // מבזק הוא שורה אחת בלי רקע, ולכן הוא בחירה גרועה לכרטיס.
+    const rankLead = (a, b) =>
+      (a.source.kind === 'flash') - (b.source.kind === 'flash') ||
+      b.summary.length - a.summary.length;
+    const items = c.items.sort(rankLead);
     const lead = items[0];
     const topics = [...new Set(items.flatMap(i => i.topics))];
     return {
@@ -39,7 +43,7 @@ export function cluster(items, threshold = 0.15) {
       topics,
       isOpinion: items.every(i => i.isOpinion),
       publishedAt: items.map(i => i.publishedAt).sort().at(-1),
-      sources: items.map(i => ({ id: i.source.id, name: i.source.name, lean: i.source.lean, link: i.link, title: i.title })),
+      sources: items.map(i => ({ id: i.source.id, name: i.source.name, lean: i.source.lean, kind: i.source.kind, link: i.link, title: i.title })),
       // סיקור נמדד לפי גופי חדשות שונים. שני פידים של אותו אתר אינם שני מקורות.
       coverage: new Set(items.map(i => i.source.id.split('-')[0])).size
     };

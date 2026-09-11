@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { normalize } from './normalize.js';
 import { cluster } from './cluster.js';
 import { isNoise } from './noise.js';
+import { withTimeout } from './timeout.js';
 
 const parser = new Parser({
   timeout: 15000,
@@ -13,15 +14,6 @@ const parser = new Parser({
 
 const MAX_AGE_HOURS = 36;
 const SOURCE_TIMEOUT_MS = 25000;
-
-/** פסק-זמן קשיח. פסק-הזמן של rss-parser אינו תופס חיבור שנתקע לפני התשובה. */
-function withTimeout(promise, ms) {
-  let timer;
-  const guard = new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`פסק-זמן אחרי ${ms / 1000} שניות`)), ms);
-  });
-  return Promise.race([promise, guard]).finally(() => clearTimeout(timer));
-}
 
 export async function fetchItems(configDir) {
   const { sources } = JSON.parse(await readFile(`${configDir}/sources.json`, 'utf8'));

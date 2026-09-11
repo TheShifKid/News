@@ -3,7 +3,7 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { collect } from '../pipeline/collect.js';
-import { buildRarity, lookbackAll, isOngoing } from '../pipeline/lookback.js';
+import { buildRarity, lookbackAll, isOngoing, representativeArticle } from '../pipeline/lookback.js';
 import { enrichStories, enrichmentEnabled } from '../pipeline/enrich.js';
 import { rank } from '../web/src/shared/rank.js';
 import { CONFIG_DIR, PUBLIC_DIR } from '../pipeline/paths.js';
@@ -25,13 +25,22 @@ console.log('בודק אילו סיפורים מתגלגלים כבר כמה י�
 const rarity = buildRarity(stories);
 const histories = await lookbackAll(candidates, rarity);
 
+const byId = new Map(stories.map(s => [s.id, s]));
+
 const rolling = new Map();
 for (const [id, history] of histories) {
   if (isOngoing(history)) {
+    // כשכל מה שיש לנו על הסיפור הוא מבזק, העדכון האחרון בציר הזמן הוא
+    // כתבה מלאה מגוף חדשות אמיתי, ולכן הוא מה שראוי להציג ולקשר אליו.
+    const onlyFlash = byId.get(id)?.sources.every(src => src.kind === 'flash');
+    const article = onlyFlash ? representativeArticle(history) : null;
+
     rolling.set(id, {
+      ...(article ? { article } : {}),
       ageDays: history.ageDays,
       activeDays: history.activeDays,
       articleCount: history.articleCount,
+      outlets: history.outlets,
       timeline: history.timeline
     });
   }

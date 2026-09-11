@@ -2,13 +2,15 @@
 // המקורות שלנו מספקים רק את היממה האחרונה, ולכן החיפוש ההיסטורי נעשה מול Google News.
 import Parser from 'rss-parser';
 import { keyTokens, overlap } from '../web/src/shared/similar.js';
+import { withTimeout } from './timeout.js';
 
 const parser = new Parser({
   timeout: 15000,
   headers: { 'User-Agent': 'Mozilla/5.0 (compatible; NewsFive/1.0)' }
 });
 
-const RELEVANCE = 0.10;   // סף חפיפה בין תוצאת החיפוש לסיפור המקורי
+const RELEVANCE = 0.16;   // סף חפיפה בין תוצאת החיפוש לסיפור המקורי
+const MIN_TERM_HITS = 2;  // כמה ממילות החיפוש חייבות להופיע בכותרת המותאמת
 
 // החיפוש סורק את כל העיתונות, כולל אתרים שאינם ברשימת המקורות.
 // כשיש כמה כתבות מאותו יום, עדיף להציג את הגוף המוכר.
@@ -21,6 +23,7 @@ const PREFERRED = [
 const isPreferred = outlet =>
   PREFERRED.some(name => (outlet || '').toLowerCase().includes(name.toLowerCase()));
 const MAX_TERMS = 3;
+const SEARCH_TIMEOUT_MS = 20000;
 
 // פעלים ומילות קישור שחוזרים בכל כותרת חדשותית ולכן אינם מזהים סיפור מסוים
 const GENERIC = new Set([
@@ -90,11 +93,20 @@ export async function lookback(story, rarity) {
     encodeURIComponent(query + ' when:14d') + '&hl=he&gl=IL&ceid=IL:he';
 
   let feed;
-  try { feed = await parser.parseURL(url); }
+  try { feed = await withTimeout(parser.parseURL(url), SEARCH_TIMEOUT_MS); }
   catch { return null; }
 
   const tokens = new Set(keyTokens(story.title + ' ' + story.summary));
   const now = Date.now();
+
+  // חפיפה כללית לבדה מדביקה סיפורים שונים שחולקים מילה אחת נפוצה
+  // ("איכילוב"), ולכן נדרשת נוכחות של מילות החיפוש עצמן.
+  const terms = query.split(' ').map(t => t.replace(/^(ו|ה|ב|ל|מ|ש|כ)/, ''));
+  const required = Math.min(MIN_TERM_HITS, terms.length);
+  const hasTerms = title => {
+    const hay = title.replace(/["'״׳]/g, '');
+    return terms.filter(t => hay.includes(t)).length >= required;
+  };
 
   const related = (feed.items || [])
     .map(item => {
@@ -102,7 +114,7 @@ export async function lookback(story, rarity) {
       return { title, outlet, link: item.link, at: item.isoDate || item.pubDate };
     })
     .filter(e => e.at && e.title)
-    .filter(e => overlap(tokens, new Set(keyTokens(e.title))) >= RELEVANCE)
+    .filter(e => hasTerms(e.title) && overlap(tokens, new Set(keyTokens(e.title))) >= RELEVANCE)
     .filter(e => {
       const age = now - new Date(e.at).getTime();
       return age > 0 && age < 15 * 864e5;
@@ -134,16 +146,32 @@ export async function lookback(story, rarity) {
   };
 }
 
-const MIN_AGE_DAYS = 2.5;   // אירוע של אתמול אינו "מתגלגל", הוא פשוט טרי
-const MIN_ACTIVE_DAYS = 3;  // חייב סיקור בכמה ימים נפרדים, לא רק התלקחות בודדת
-const MIN_ARTICLES = 4;
+const MIN_AGE_DAYS = 2.5;    // אירוע של אתמול אינו "מתגלגל", הוא פשוט טרי
+const MIN_ACTIVE_DAYS = 3;   // סיקור בשלושה ימים נפרדים, לא התלקחות בודדת
+const MIN_ARTICLES = 6;      // נפח אמיתי, לא שתי ידיעות שנקשרו במקרה
+const MIN_OUTLETS = 5;       // כמה גופים שונים טרחו לסקר — מדד החשיבות החזק ביותר
 
-/** האם האירוע התחיל מזמן ועדיין מדברים עליו. */
+/** האם האירוע התחיל מזמן, עדיין מדברים עליו, ומספיק חשוב כדי להציג. */
 export function isOngoing(history) {
   return Boolean(history)
     && history.ageDays >= MIN_AGE_DAYS
     && history.activeDays >= MIN_ACTIVE_DAYS
-    && history.articleCount >= MIN_ARTICLES;
+    && history.articleCount >= MIN_ARTICLES
+    && history.outlets.length >= MIN_OUTLETS;
+}
+
+/**
+ * הכתבה שתייצג סיפור מתגלגל: העדכון האחרון מגוף מוכר.
+ * העדכון האחרון בהחלט יכול להיות מאתר שולי שסיקר לבדו באותו יום.
+ */
+export function representativeArticle(history) {
+  const preferred = [...history.timeline].reverse().find(e => isPreferred(e.outlet));
+  return preferred || history.timeline.at(-1) || null;
+}
+
+/** עוצמת הסיפור: כמה גופים, כמה ימים, כמה כתבות. משמש לסדר ההצגה. */
+export function momentum(history) {
+  return history.outlets.length * 2 + history.activeDays + Math.log2(history.articleCount);
 }
 
 /** מריץ את החיפוש ההיסטורי על כמה סיפורים במקביל, בלי להציף את השרת בבת אחת. */

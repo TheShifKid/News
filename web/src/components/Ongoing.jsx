@@ -14,8 +14,12 @@ function daysLabel(days) {
 function Thread({ story }) {
   const [open, setOpen] = useState(false);
   const color = topicColor(story.topics);
-  const { ageDays, activeDays, timeline } = story.rolling;
-  const outlet = uniqueOutlets(story.sources)[0];
+  const { ageDays, activeDays, timeline, article } = story.rolling;
+
+  // כשכל מה שיש לנו הוא מבזק, מוצגת במקומו הכתבה המלאה האחרונה על הסיפור
+  const headline = article?.title || story.title;
+  const link = article?.link || story.sources[0].link;
+  const outletName = article?.outlet || uniqueOutlets(story.sources)[0].name;
 
   return (
     <article className="border border-rule rounded-[3px] bg-paper-2 overflow-hidden">
@@ -32,10 +36,10 @@ function Thread({ story }) {
         </div>
 
         <h3 className="font-display text-[19px] leading-[1.3] text-balance">
-          <a href={story.sources[0].link} target="_blank" rel="noreferrer">{story.title}</a>
+          <a href={link} target="_blank" rel="noreferrer">{headline}</a>
         </h3>
 
-        {story.summary && (
+        {!article && story.summary && (
           <p className="mt-2 text-[13px] leading-[1.6] text-ink-2 line-clamp-3">{story.summary}</p>
         )}
 
@@ -44,7 +48,7 @@ function Thread({ story }) {
                   className="text-[12px] font-bold" style={{ color }}>
             {open ? 'סגור את ציר הזמן' : `איך הגענו לכאן · ${timeline.length} תחנות`}
           </button>
-          <span className="text-[11px] text-ink-3 mr-auto">{outlet.name}</span>
+          <span className="text-[11px] text-ink-3 mr-auto">{outletName}</span>
         </div>
 
         {open && (
