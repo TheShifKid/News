@@ -1,0 +1,61 @@
+name: עדכון חדשות ופרסום
+
+on:
+  schedule:
+    # כל 30 דקות. GitHub מריץ לפי UTC, אבל התדירות היא מה שקובע כאן.
+    - cron: '*/30 * * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# ריצה אחת בכל רגע נתון, כדי ששתי ריצות לא ידרסו זו את קובץ ההיסטוריה של זו
+concurrency:
+  group: feed
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: התקנת חבילות
+        run: |
+          npm ci
+          npm ci --prefix web
+
+      - name: משיכת חדשות ובניית האתר
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npm run build
+
+      - name: שמירת ההיסטוריה לריצה הבאה
+        run: |
+          git config user.name "news-bot"
+          git config user.email "news-bot@users.noreply.github.com"
+          git add web/public/history.json
+          git diff --staged --quiet || git commit -m "עדכון היסטוריית סיפורים"
+          git push
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

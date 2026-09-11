@@ -1,0 +1,10 @@
+{
+  "blocklist": { "names": [], "accounts": [], "keywords": [] },
+  "topicWeights": {
+    "politics": 1.0, "security": 1.0, "economy": 0.9,
+    "tech": 0.85, "music": 0.8, "culture": 0.6,
+    "world": 0.5, "sports": 0.15, "general": 0.7
+  },
+  "briefSize": 7,
+  "leanBoost": { "left": 0.08, "center": 0, "right": -0.05 }
+}

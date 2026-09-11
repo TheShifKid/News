@@ -1,0 +1,20 @@
+{
+  "name": "news5",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node scripts/build-feed.mjs && npm --prefix web run build",
+    "dev": "npm --prefix web run dev",
+    "feed": "node scripts/build-feed.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": "true",
+  "dependencies": {
+    "rss-parser": "^3.13.0"
+  }
+}

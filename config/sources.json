@@ -1,0 +1,17 @@
+{
+  "sources": [
+    { "id": "ynet-main",      "name": "Ynet",            "lean": "center", "topics": ["general"],            "url": "https://www.ynet.co.il/Integration/StoryRss2.xml" },
+    { "id": "ynet-flash",     "name": "Ynet מבזקים",     "lean": "center", "topics": ["general"],            "url": "https://www.ynet.co.il/Integration/StoryRss1854.xml" },
+    { "id": "ynet-biz",       "name": "Ynet כלכלה",      "lean": "center", "topics": ["economy"],            "url": "https://www.ynet.co.il/Integration/StoryRss3.xml" },
+    { "id": "ynet-culture",   "name": "Ynet תרבות",      "lean": "center", "topics": ["culture","music"],    "url": "https://www.ynet.co.il/Integration/StoryRss538.xml" },
+    { "id": "n12-israel",     "name": "N12 בארץ",        "lean": "center", "topics": ["general"],            "url": "https://rcs.mako.co.il/rss/news-israel.xml" },
+    { "id": "n12-military",   "name": "N12 מדיני-ביטחוני","lean": "center","topics": ["security","politics"],"url": "https://rcs.mako.co.il/rss/news-military.xml" },
+    { "id": "n12-law",        "name": "N12 משפט",        "lean": "center", "topics": ["politics"],           "url": "https://rcs.mako.co.il/rss/news-law.xml" },
+    { "id": "haaretz",        "name": "הארץ",            "lean": "left",   "topics": ["politics","opinion"], "url": "https://www.haaretz.co.il/srv/rss---feedly" },
+    { "id": "mekomit",        "name": "שיחה מקומית",     "lean": "left",   "topics": ["politics","opinion"], "url": "https://www.mekomit.co.il/feed/" },
+    { "id": "davar",          "name": "דבר",             "lean": "left",   "topics": ["economy","politics"], "url": "https://www.davar1.co.il/feed/" },
+    { "id": "shakuf",         "name": "שקוף",            "lean": "left",   "topics": ["politics","opinion"], "url": "https://shakuf.co.il/feed" },
+    { "id": "walla",          "name": "וואלה",           "lean": "center", "topics": ["general"],            "url": "https://rss.walla.co.il/feed/1?type=main" },
+    { "id": "toi",            "name": "Times of Israel", "lean": "center", "topics": ["world"],              "url": "https://www.timesofisrael.com/feed/" }
+  ]
+}

@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Suez One", Georgia, serif;
+  --font-sans: "Heebo", "Segoe UI", system-ui, sans-serif;
+
+  /* נייר בהיר עם נטייה חמה קלה, דיו כמעט שחור, וצבע לכל נושא */
+  --color-paper: #fbfbfa;
+  --color-paper-2: #ffffff;
+  --color-rule: #e6e5e2;
+  --color-ink: #0b0b0c;
+  --color-ink-2: #43454a;
+  --color-ink-3: #82858c;
+
+  --color-t-security: #d8392b;
+  --color-t-politics: #1b57c4;
+  --color-t-economy: #0f7a52;
+  --color-t-tech: #6b3fc4;
+  --color-t-music: #c4257e;
+  --color-t-culture: #b0591b;
+  --color-t-world: #0b6d7d;
+  --color-t-sports: #4a6218;
+  --color-t-general: #5a5d66;
+}
+
+/* עיצוב בהיר מכוון. הרקע נצבע במפורש כדי שלא יירש רקע כהה מהמארח. */
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+.no-bar { scrollbar-width: none; }
+.no-bar::-webkit-scrollbar { display: none; }
+
+/* מספר הסיפור בגופן הכותרות — סימון סדר, לא קישוט */
+.numeral { font-family: var(--font-display); font-size: 13px; color: #b4b6bb; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .enter { animation: enter 0.35s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+:focus-visible { outline: 2px solid var(--color-t-politics); outline-offset: 2px; }
