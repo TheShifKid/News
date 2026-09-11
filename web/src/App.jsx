@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Brief from './components/Brief.jsx';
+import Ongoing from './components/Ongoing.jsx';
 import Feed from './components/Feed.jsx';
 import Quiz from './components/Quiz.jsx';
 import Settings from './components/Settings.jsx';
@@ -35,11 +36,21 @@ export default function App() {
     navigator.serviceWorker?.register('sw.js').catch(() => {});
   }, []);
 
-  const { brief, rest } = useMemo(() => {
-    if (!feed) return { brief: [], rest: [] };
+  const { brief, ongoing, rest } = useMemo(() => {
+    if (!feed) return { brief: [], ongoing: [], rest: [] };
     const { kept } = applyBlocklist(feed.stories, settings.blocklist);
     const ranked = rank(kept, settings);
-    return { brief: ranked.slice(0, settings.briefSize), rest: ranked.slice(settings.briefSize) };
+    const brief = ranked.slice(0, settings.briefSize);
+    const inBrief = new Set(brief.map(s => s.id));
+
+    // סיפור מתגלגל שכבר נכנס לתקציר אינו חוזר בסעיף הנפרד — שם מופיע רק מה שאחרת היה נעלם
+    const ongoing = ranked
+      .filter(s => s.rolling && !inBrief.has(s.id))
+      .sort((a, b) => b.rolling.articleCount - a.rolling.articleCount)
+      .slice(0, 4);
+    const shown = new Set([...inBrief, ...ongoing.map(s => s.id)]);
+
+    return { brief, ongoing, rest: ranked.filter(s => !shown.has(s.id)) };
   }, [feed, settings]);
 
   function updateSettings(next) {
@@ -69,7 +80,11 @@ export default function App() {
         )}
         {!error && !feed && <p className="px-5 py-10 text-ink-3">טוען…</p>}
 
-        {feed && tab === 'brief' && <Brief stories={brief} onDone={setStreak} />}
+        {feed && tab === 'brief' && (
+          <Brief stories={brief} onDone={setStreak}>
+            <Ongoing stories={ongoing} />
+          </Brief>
+        )}
         {feed && tab === 'feed' && <Feed stories={rest} />}
         {feed && tab === 'quiz' && (
           feed.quiz

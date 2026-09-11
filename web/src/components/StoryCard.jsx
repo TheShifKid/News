@@ -46,24 +46,6 @@ export default function StoryCard({ story, index }) {
           </details>
         )}
 
-        {story.timeline?.length > 0 && (
-          <details className="mt-3">
-            <summary className="text-xs text-ink-3 cursor-pointer list-none">
-              איך הגענו לכאן · {story.timeline.length} עדכונים ▾
-            </summary>
-            <ol className="mt-2 space-y-1.5 pr-3 border-r border-rule">
-              {story.timeline.map(e => (
-                <li key={e.id} className="text-[13px] leading-snug">
-                  <span className="text-ink-3 tabular-nums">
-                    {new Date(e.at).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' })}
-                  </span>{' '}
-                  <a href={e.link} target="_blank" rel="noreferrer" className="text-ink-2">{e.title}</a>
-                </li>
-              ))}
-            </ol>
-          </details>
-        )}
-
         <p className="mt-4 text-xs text-ink-3">
           {story.coverage > 1 ? 'דיווחו: ' : 'מקור: '}
           {outlets.map((s, i) => (

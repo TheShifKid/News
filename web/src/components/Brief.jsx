@@ -2,7 +2,7 @@ import StoryCard from './StoryCard.jsx';
 import { markDone } from '../streak.js';
 import { useEffect, useRef } from 'react';
 
-export default function Brief({ stories, onDone }) {
+export default function Brief({ stories, onDone, children }) {
   const end = useRef(null);
 
   // הרצף נספר כשמגיעים לסוף התקציר, לא כשפותחים את האפליקציה
@@ -23,6 +23,8 @@ export default function Brief({ stories, onDone }) {
   return (
     <div className="h-full overflow-y-auto no-bar pb-8">
       {stories.map((s, i) => <StoryCard key={s.id} story={s} index={i} />)}
+
+      {children}
 
       <div ref={end} className="px-5 pt-8 pb-4 text-center">
         <p className="font-display text-2xl">זהו להיום</p>

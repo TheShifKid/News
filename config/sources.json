@@ -11,7 +11,6 @@
     { "id": "mekomit",        "name": "שיחה מקומית",     "lean": "left",   "topics": ["politics","opinion"], "url": "https://www.mekomit.co.il/feed/" },
     { "id": "davar",          "name": "דבר",             "lean": "left",   "topics": ["economy","politics"], "url": "https://www.davar1.co.il/feed/" },
     { "id": "shakuf",         "name": "שקוף",            "lean": "left",   "topics": ["politics","opinion"], "url": "https://shakuf.co.il/feed" },
-    { "id": "walla",          "name": "וואלה",           "lean": "center", "topics": ["general"],            "url": "https://rss.walla.co.il/feed/1?type=main" },
     { "id": "toi",            "name": "Times of Israel", "lean": "center", "topics": ["world"],              "url": "https://www.timesofisrael.com/feed/" }
   ]
 }
