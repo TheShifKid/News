@@ -85,6 +85,19 @@ function outletOf(item) {
   return m ? { title: m[1].trim(), outlet: m[2].trim() } : { title: item.title || '', outlet: '' };
 }
 
+const MIN_CORE_TOKENS = 2;
+const CORE_SHARE = 0.6;
+
+/** מילים שמופיעות ברוב הכתבות שנמצאו. */
+function coreTokens(entries) {
+  const counts = new Map();
+  for (const e of entries) {
+    for (const w of new Set(keyTokens(e.title))) counts.set(w, (counts.get(w) || 0) + 1);
+  }
+  const needed = Math.max(2, Math.ceil(entries.length * CORE_SHARE));
+  return [...counts.entries()].filter(([, n]) => n >= needed).map(([w]) => w);
+}
+
 export async function lookback(story, rarity) {
   const query = queryFor(story, rarity);
   if (!query) return null;
@@ -123,6 +136,12 @@ export async function lookback(story, rarity) {
 
   if (!related.length) return null;
 
+  // ליבת הסיפור: המילים שחוזרות ברוב הכתבות שנמצאו. סיפור אמיתי נשען על
+  // כמה מילים משותפות ("לבנון", "תקיפות", "דרום"); אוסף מקרי של ידיעות
+  // נשען על מילה אחת בלבד — שם מוסד או מקום — וזה מה שמסגיר אותו.
+  const core = coreTokens(related);
+  if (core.length < MIN_CORE_TOKENS) return null;
+
   const days = [...new Set(related.map(e => e.at.slice(0, 10)))];
   const firstAt = related[0].at;
   const ageDays = (now - new Date(firstAt).getTime()) / 864e5;
@@ -142,6 +161,7 @@ export async function lookback(story, rarity) {
     activeDays: days.length,
     articleCount: related.length,
     outlets: [...new Set(related.map(e => e.outlet).filter(Boolean))],
+    core,
     timeline: [...byDay.values()]
   };
 }
