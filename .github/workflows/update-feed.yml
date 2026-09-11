@@ -13,14 +13,16 @@ permissions:
   pages: write
   id-token: write
 
-# ריצה אחת בכל רגע נתון, כדי ששתי ריצות לא יפרסמו זו על זו
+# ריצה אחת בכל רגע נתון. ריצה חדשה מבטלת ישנה שנתקעה, אחרת תקיעה אחת
+# חוסמת את כל העדכונים עד לתום שש שעות הפסק-זמן של GitHub.
 concurrency:
   group: feed
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 

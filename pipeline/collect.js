@@ -12,13 +12,23 @@ const parser = new Parser({
 });
 
 const MAX_AGE_HOURS = 36;
+const SOURCE_TIMEOUT_MS = 25000;
+
+/** פסק-זמן קשיח. פסק-הזמן של rss-parser אינו תופס חיבור שנתקע לפני התשובה. */
+function withTimeout(promise, ms) {
+  let timer;
+  const guard = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`פסק-זמן אחרי ${ms / 1000} שניות`)), ms);
+  });
+  return Promise.race([promise, guard]).finally(() => clearTimeout(timer));
+}
 
 export async function fetchItems(configDir) {
   const { sources } = JSON.parse(await readFile(`${configDir}/sources.json`, 'utf8'));
 
   const results = await Promise.allSettled(
     sources.map(async src => {
-      const feed = await parser.parseURL(src.url);
+      const feed = await withTimeout(parser.parseURL(src.url), SOURCE_TIMEOUT_MS);
       return feed.items.map(i => normalize(i, src));
     })
   );

@@ -1,6 +1,6 @@
 // מטמון קליפה: האפליקציה נפתחת מיידית וגם בלי רשת.
 // החדשות עצמן נמשכות מהרשת קודם, כדי שלא יוצג תקציר ישן כשיש חיבור.
-const SHELL = 'news5-shell-v2';
+const SHELL = 'news5-shell-v3';
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -25,7 +25,11 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.endsWith('/feed.json')) {
+  // הדף עצמו והחדשות נמשכים מהרשת קודם. אחרת גרסה ישנה של האפליקציה
+  // נשארת במטמון לנצח, כי index.html מצביע על קבצי ה-JS הישנים.
+  const isPage = request.mode === 'navigate' || url.pathname.endsWith('/index.html');
+
+  if (isPage || url.pathname.endsWith('/feed.json')) {
     event.respondWith(
       fetch(request)
         .then(response => {
@@ -33,7 +37,7 @@ self.addEventListener('fetch', event => {
           caches.open(SHELL).then(cache => cache.put(request, copy));
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(async () => (await caches.match(request)) || (await caches.match('./')))
     );
     return;
   }
