@@ -39,25 +39,6 @@ export default function StoryCard({ story, index }) {
           </p>
         )}
 
-        {story.rolling && (
-          // סיפור מתגלגל שנכנס לתקציר אינו חוזר בסעיף התחתון, ולכן הסימון חייב להיות כאן
-          <details className="mt-3">
-            <summary className="text-xs cursor-pointer list-none font-bold" style={{ color }}>
-              נמשך {Math.round(story.rolling.ageDays)} ימים · איך הגענו לכאן ▾
-            </summary>
-            <ol className="mt-2 pr-3 border-r border-rule flex flex-col gap-1.5">
-              {story.rolling.timeline.map(entry => (
-                <li key={entry.link} className="text-[13px] leading-snug">
-                  <span className="text-ink-3 tabular-nums">
-                    {new Date(entry.at).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' })}
-                  </span>{' '}
-                  <a href={entry.link} target="_blank" rel="noreferrer" className="text-ink-2">{entry.title}</a>
-                </li>
-              ))}
-            </ol>
-          </details>
-        )}
-
         {story.background && (
           <details className="mt-3">
             <summary className="text-xs text-ink-3 cursor-pointer list-none">רקע למי שלא עקב ▾</summary>

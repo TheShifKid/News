@@ -40,15 +40,14 @@ export default function App() {
     if (!feed) return { brief: [], ongoing: [], rest: [] };
     const { kept } = applyBlocklist(feed.stories, settings.blocklist);
     const ranked = rank(kept, settings);
-    const brief = ranked.slice(0, settings.briefSize);
-    const inBrief = new Set(brief.map(s => s.id));
-
-    // סיפור מתגלגל שכבר נכנס לתקציר אינו חוזר בסעיף הנפרד — שם מופיע רק מה שאחרת היה נעלם
+    // סיפור מתגלגל אינו "מה חדש היום", ולכן הוא עובר לסעיף שלו ולא נכנס לתקציר.
+    // בכיוון ההפוך הסעיף נעלם בדיוק כשהסיפור המתגלגל חשוב מספיק כדי להידרג גבוה.
     const ongoing = ranked
-      .filter(s => s.rolling && !inBrief.has(s.id))
+      .filter(s => s.rolling)
       .sort((a, b) => b.rolling.articleCount - a.rolling.articleCount)
       .slice(0, 4);
-    const shown = new Set([...inBrief, ...ongoing.map(s => s.id)]);
+    const brief = ranked.filter(s => !s.rolling).slice(0, settings.briefSize);
+    const shown = new Set([...brief, ...ongoing].map(s => s.id));
 
     return { brief, ongoing, rest: ranked.filter(s => !shown.has(s.id)) };
   }, [feed, settings]);
