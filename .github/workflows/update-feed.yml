@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -39,6 +39,21 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npm run build
+
+      # GitHub מכבה תזמון במאגר שאין בו פעילות במשך שישים יום, וזה מה שקרה כאן
+      # ב-11 בנובמבר. קומיט ריק אחת לכמה שבועות מאפס את השעון. התנאי הכרחי:
+      # בלעדיו היו נוצרים כאן קומיטים בכל ריצה, כלומר אלפים בחודש.
+      - name: שמירה על התזמון פעיל
+        if: github.event_name == 'schedule'
+        run: |
+          days=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "הקומיט האחרון נעשה לפני $days ימים"
+          if [ "$days" -ge 45 ]; then
+            git config user.name "news-bot"
+            git config user.email "news-bot@users.noreply.github.com"
+            git commit --allow-empty -m "שמירה על התזמון פעיל"
+            git push
+          fi
 
       - uses: actions/upload-pages-artifact@v3
         with:
